@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0b1220">
+<title>ATCO Hub</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0b1220; color: #e6edf7; font: 16px/1.5 system-ui, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
+  a { color: #35d0bf; }
+  .muted { color: #8a97ad; font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>ATCO Hub</h1>
+  <p id="msg">Opening the app…</p>
+  <p class="muted" id="more"></p>
+</main>
+<script>
+/* The app's address changes when its server restarts. link.json holds the current one; this page sends you there.
+   Only a Cloudflare quick-tunnel address is followed, so a bad file cannot send anyone elsewhere. */
+(function () {
+  var msg = document.getElementById("msg"), more = document.getElementById("more");
+  var ok = /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/;
+  fetch("link.json?t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (j) {
+      if (!j || !ok.test(j.url)) throw new Error("bad address");
+      msg.innerHTML = 'Opening <a id="go"></a>';
+      var a = document.getElementById("go"); a.href = j.url; a.textContent = j.url.replace("https://", "");
+      location.replace(j.url);
+    })
+    .catch(function () {
+      msg.textContent = "The app's address could not be loaded.";
+      more.textContent = "Check your connection and reload this page. If it keeps failing, the server may be off: ask the admin.";
+    });
+})();
+</script>
+</body>
+</html>
