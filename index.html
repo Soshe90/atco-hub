@@ -2,35 +2,67 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-title" content="ATCO Hub">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
 <title>ATCO Hub</title>
 <style>
-  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0b1220; color: #e6edf7; font: 16px/1.5 system-ui, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0b1220; color: #e9eefb; font: 16px/1.5 system-ui, -apple-system, sans-serif; padding: 24px; box-sizing: border-box; }
+  main { max-width: 420px; width: 100%; text-align: center; }
+  img.logo { width: 76px; height: 76px; border-radius: 20px; }
+  h1 { font-size: 26px; margin: 14px 0 4px; }
   a { color: #35d0bf; }
-  .muted { color: #8a97ad; font-size: 14px; }
+  .muted { color: #8b98b8; font-size: 14px; }
+  ol { text-align: left; background: #111a2c; border: 1px solid #223050; border-radius: 16px; padding: 16px 16px 16px 36px; margin: 20px 0; }
+  li { margin: 8px 0; }
+  .btn { display: block; padding: 14px; border-radius: 12px; background: #35d0bf; color: #04211e; font-weight: 700; text-decoration: none; }
+  [hidden] { display: none; }
 </style>
 </head>
 <body>
 <main>
+  <img class="logo" src="icon-192.png" alt="">
   <h1>ATCO Hub</h1>
-  <p id="msg">Opening the app…</p>
-  <p class="muted" id="more"></p>
+  <div id="go">
+    <p id="msg">Opening the app…</p>
+    <p class="muted" id="more"></p>
+  </div>
+  <div id="install" hidden>
+    <p class="muted">Add this page to your home screen. The icon always finds the app, even after its address changes.</p>
+    <ol>
+      <li>In Safari, tap the <b>Share</b> button.</li>
+      <li>Tap <b>Add to Home Screen</b>.</li>
+      <li>If you see <b>Open as Web App</b>, turn it <b>off</b>.</li>
+      <li>Tap <b>Add</b>, then open ATCO Hub from the new icon.</li>
+    </ol>
+    <a class="btn" href="./">Open ATCO Hub now</a>
+    <p class="muted">After the app's address changes you sign in again once. The icon keeps working.</p>
+  </div>
 </main>
 <script>
-/* The app's address changes when its server restarts. link.json holds the current one; this page sends you there.
-   Only a Cloudflare quick-tunnel address is followed, so a bad file cannot send anyone elsewhere. */
+/* The app's address changes when its server restarts. link.json holds the current one, and this page sends you there.
+   With ?install it stays put instead, so that Add to Home Screen saves this fixed address rather than the app's
+   current one. Only a Cloudflare quick-tunnel address is followed, so a bad file cannot send anyone elsewhere. */
 (function () {
+  if (/[?&]install\b/.test(location.search)) {
+    document.getElementById("go").hidden = true; document.getElementById("install").hidden = false;
+    /* Add to Home Screen saves the address shown, so show the plain one: the icon then opens the app, not these steps */
+    history.replaceState(null, "", location.pathname);
+    return;
+  }
   var msg = document.getElementById("msg"), more = document.getElementById("more");
   var ok = /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/;
   fetch("link.json?t=" + Date.now(), { cache: "no-store" })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (j) {
       if (!j || !ok.test(j.url)) throw new Error("bad address");
-      msg.innerHTML = 'Opening <a id="go"></a>';
-      var a = document.getElementById("go"); a.href = j.url; a.textContent = j.url.replace("https://", "");
+      msg.innerHTML = 'Opening <a id="to"></a>';
+      var a = document.getElementById("to"); a.href = j.url; a.textContent = j.url.replace("https://", "");
       location.replace(j.url);
     })
     .catch(function () {
